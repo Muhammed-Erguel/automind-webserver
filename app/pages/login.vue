@@ -68,11 +68,8 @@ async function onSubmit() {
     // await $fetch('/api/register', { method: 'POST', body: form.value })
 
     await new Promise((r) => setTimeout(r, 300));
-    success.value = "Registrierung erfolgreich (Demo). Weiterleitung…";
-
-    await navigateTo("/register/paket");
   } catch (e: any) {
-    error.value = "Registrierung fehlgeschlagen. Bitte versuche es erneut.";
+    error.value = "Anmeldung fehlgeschlagen. Bitte versuche es erneut.";
   } finally {
     isSubmitting.value = false;
   }
