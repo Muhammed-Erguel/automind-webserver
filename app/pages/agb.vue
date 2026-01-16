@@ -1,6 +1,6 @@
 <template>
   <div>
     <h1>AGB</h1>
-    <p>Startseite</p>
+    <p>erwin der hacker</p>
   </div>
 </template>
