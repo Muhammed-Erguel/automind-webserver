@@ -1,6 +1,20 @@
 <template>
   <div class="page">
     <div class="container">
+      <!-- Stepper -->
+      <div class="stepper">
+        <div class="step done">
+          <div class="dot done">✓</div>
+          <div class="label done">Konto erstellen</div>
+          <div class="line"></div>
+        </div>
+
+        <div class="step active">
+          <div class="dot">2</div>
+          <div class="label">Paket auswählen</div>
+        </div>
+      </div>
+
       <div class="card">
         <h1>Paket auswählen</h1>
         <p class="sub">Wähle das passende Paket aus. Du kannst später jederzeit wechseln.</p>
@@ -73,10 +87,13 @@
         </div>
 
         <button class="btn" :disabled="!selected || isSubmitting" @click="goToCheckout">
-          Jetzt abonnieren
+          Weiter zur Zahlung
         </button>
 
         <p v-if="error" class="error">{{ error }}</p>
+        <p class="back">
+          <NuxtLink class="link" to="/register">← Zurück</NuxtLink>
+        </p>
       </div>
     </div>
   </div>
