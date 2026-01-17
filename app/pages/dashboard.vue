@@ -5,7 +5,6 @@ const user = useSupabaseUser()
 const ready = ref(false)
 
 onMounted(async () => {
-  // Einmal Session laden, bevor du entscheidest
   await supabase.auth.getSession()
   ready.value = true
 

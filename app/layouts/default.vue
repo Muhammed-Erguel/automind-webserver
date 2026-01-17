@@ -32,6 +32,15 @@
           >
             Abmelden
           </NuxtLink>
+
+          <NuxtLink 
+            v-if="user"
+            class="nav-link desktop-only"
+            @click="showDashboard"
+          >
+            Dashboard
+          </NuxtLink>
+
           <NuxtLink class="register-btn desktop-only" to="/register">
             Registrieren <span class="arrow">→</span>
           </NuxtLink>
@@ -148,6 +157,10 @@ function toggleMenu() {
 
 function closeMenu() {
   isMenuOpen.value = false;
+}
+
+async function showDashboard() {
+  await navigateTo('/dashboard')
 }
 
 // Optional: ESC schließt Menü

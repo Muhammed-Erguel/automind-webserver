@@ -25,6 +25,19 @@
         </p>
 
         <form class="form" @submit.prevent="onSubmit">
+
+          <div class="field">
+            <label for="company">E-Mail <span class="req">*</span></label>
+            <input
+              id="company"
+              v-model.trim="form.company"
+              type="company"
+              placeholder="Firma eingeben"
+              autocomplete="company"
+              required
+            />
+          </div>
+
           <div class="field">
             <label for="email">E-Mail <span class="req">*</span></label>
             <input
@@ -99,6 +112,7 @@ const form = ref({
   password: "",
   password2: "",
   code: "",
+  company: "",
   acceptTerms: false,
   newsletter: false,
 });
@@ -121,10 +135,12 @@ async function onSubmit() {
     const { error } = await supabase.auth.signUp({
       email: form.value.email,
       password: form.value.password,
+      options: {
+      data: {
+        company: form.value.company,
+      },
+    },
     })
-
-    // TODO: API Call
-    // await $fetch('/api/register', { method: 'POST', body: form.value })
 
     await new Promise((r) => setTimeout(r, 300));
     success.value = "Registrierung erfolgreich (Demo). Weiterleitung…";
