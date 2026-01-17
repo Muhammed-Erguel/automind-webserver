@@ -7,7 +7,7 @@
 
         <form class="form" @submit.prevent="onSubmit">
           <div class="field">
-            <label for="email">E-Mail <span class="req">*</span></label>
+            <label for="email">E-Mail</label>
             <input
               id="email"
               v-model.trim="form.email"
@@ -19,7 +19,7 @@
           </div>
 
           <div class="field">
-            <label for="password">Passwort <span class="req">*</span></label>
+            <label for="password">Passwort</label>
             <input
               id="password"
               v-model="form.password"
@@ -45,8 +45,9 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 
-useHead({ title: "Registrieren" });
+useHead({ title: "Anmeldung" });
 
+const supabase = useSupabaseClient()
 const isSubmitting = ref(false);
 const error = ref("");
 const success = ref("");
@@ -64,10 +65,18 @@ async function onSubmit() {
 
   isSubmitting.value = true;
   try {
-    // TODO: API Call
-    // await $fetch('/api/register', { method: 'POST', body: form.value })
+    const { error } = await supabase.auth.signInWithPassword({
+      email: form.value.email,
+      password: form.value.password,
+    })
+
+    if (error) {
+      error.message = error.message
+      return
+    }
 
     await new Promise((r) => setTimeout(r, 300));
+    await navigateTo('/dashboard')
   } catch (e: any) {
     error.value = "Anmeldung fehlgeschlagen. Bitte versuche es erneut.";
   } finally {

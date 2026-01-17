@@ -17,7 +17,21 @@
         <!-- Right -->
         <div class="nav-right">
           <!-- Desktop Auth -->
-          <NuxtLink class="nav-link desktop-only" to="/login">Anmelden</NuxtLink>
+          <NuxtLink 
+            v-if="!user" 
+            class="nav-link desktop-only" 
+            to="/login"
+          >
+            Anmelden
+          </NuxtLink>
+
+          <NuxtLink 
+            v-else
+            class="nav-link desktop-only"
+            @click="logout"
+          >
+            Abmelden
+          </NuxtLink>
           <NuxtLink class="register-btn desktop-only" to="/register">
             Registrieren <span class="arrow">→</span>
           </NuxtLink>
@@ -101,6 +115,14 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from "vue";
+
+const user = useSupabaseUser()
+const supabase = useSupabaseClient()
+
+const logout = async () => {
+  await supabase.auth.signOut()
+  await navigateTo('/')
+}
 
 const isMenuOpen = ref(false);
 

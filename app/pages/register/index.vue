@@ -116,6 +116,13 @@ async function onSubmit() {
 
   isSubmitting.value = true;
   try {
+    const supabase = useSupabaseClient()
+
+    const { error } = await supabase.auth.signUp({
+      email: form.value.email,
+      password: form.value.password,
+    })
+
     // TODO: API Call
     // await $fetch('/api/register', { method: 'POST', body: form.value })
 
