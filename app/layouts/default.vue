@@ -63,7 +63,23 @@
 
           <div class="mobile-sep"></div>
 
-          <NuxtLink class="mobile-link" to="/login" @click="closeMenu">Anmelden</NuxtLink>
+          <NuxtLink 
+            v-if="!user" 
+            class="mobile-link" 
+            to="/login" 
+            @click="closeMenu"
+          >
+            Anmelden
+          </NuxtLink>
+
+          <NuxtLink 
+            v-else
+            class="mobile-link"
+            @click="logout"
+          >
+            Abmelden
+          </NuxtLink>
+
           <NuxtLink class="mobile-link" to="/agb" @click="closeMenu">AGB</NuxtLink>
           <NuxtLink class="mobile-link" to="/datenschutz" @click="closeMenu">Datenschutz</NuxtLink>
           <NuxtLink class="mobile-link" to="/impressum" @click="closeMenu">Impressum</NuxtLink>

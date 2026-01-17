@@ -34,7 +34,7 @@
             Anmelden
           </button>
 
-          <p v-if="error" class="error">{{ error }}</p>
+          <p v-if="errorShow" class="error">{{ errorShow }}</p>
           <p v-if="success" class="success">{{ success }}</p>
         </form>
       </div>
@@ -49,7 +49,7 @@ useHead({ title: "Anmeldung" });
 
 const supabase = useSupabaseClient()
 const isSubmitting = ref(false);
-const error = ref("");
+const errorShow = ref("");
 const success = ref("");
 
 const form = ref({
@@ -60,7 +60,7 @@ const form = ref({
 });
 
 async function onSubmit() {
-  error.value = "";
+  errorShow.value = "";
   success.value = "";
 
   isSubmitting.value = true;
@@ -71,14 +71,14 @@ async function onSubmit() {
     })
 
     if (error) {
-      error.message = error.message
+      errorShow.value = "Anmeldung fehlgeschlagen"
       return
     }
 
     await new Promise((r) => setTimeout(r, 300));
     await navigateTo('/dashboard')
   } catch (e: any) {
-    error.value = "Anmeldung fehlgeschlagen. Bitte versuche es erneut.";
+    errorShow.value = "Anmeldung fehlgeschlagen. Bitte versuche es erneut.";
   } finally {
     isSubmitting.value = false;
   }
