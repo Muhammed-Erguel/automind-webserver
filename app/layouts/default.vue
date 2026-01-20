@@ -89,6 +89,8 @@
             Abmelden
           </NuxtLink>
 
+          <NuxtLink v-if="user" class="mobile-link" @click="showDashboard">Dashboard</NuxtLink>
+
           <NuxtLink class="mobile-link" to="/agb" @click="closeMenu">AGB</NuxtLink>
           <NuxtLink class="mobile-link" to="/datenschutz" @click="closeMenu">Datenschutz</NuxtLink>
           <NuxtLink class="mobile-link" to="/impressum" @click="closeMenu">Impressum</NuxtLink>
