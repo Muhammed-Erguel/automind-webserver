@@ -84,6 +84,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+const user = useSupabaseUser()
 
 useHead({ title: "Paket auswählen" });
 
@@ -92,6 +93,11 @@ const isSubmitting = ref(false);
 const error = ref("");
 
 async function goToCheckout() {
+  if (!user.value) {
+    await navigateTo('/login')
+    return;
+  }
+  
   error.value = "";
   if (!selected.value) return;
 

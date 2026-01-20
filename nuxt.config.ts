@@ -5,7 +5,10 @@ export default defineNuxtConfig({
   css: [
     '@/assets/css/main.css'
   ],
-  modules: ['@nuxtjs/supabase'],
+  modules: [
+    '@nuxtjs/supabase',
+    '@pinia/nuxt',
+  ],
   supabase: {
     url: process.env.SUPABASE_URL || process.env.NUXT_PUBLIC_SUPABASE_URL,
     key:

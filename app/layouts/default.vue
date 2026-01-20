@@ -140,9 +140,11 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from "vue";
+import { useAuthStore } from "~/stores/auth";
 
 const user = useSupabaseUser()
 const supabase = useSupabaseClient()
+const authStore = useAuthStore()
 
 const logout = async () => {
   await supabase.auth.signOut()
@@ -159,8 +161,8 @@ function closeMenu() {
   isMenuOpen.value = false;
 }
 
-async function showDashboard() {
-  await navigateTo('/dashboard')
+function showDashboard() {
+  authStore.logged = true
 }
 
 // Optional: ESC schließt Menü

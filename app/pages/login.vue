@@ -76,7 +76,7 @@ async function onSubmit() {
     }
 
     await new Promise((r) => setTimeout(r, 300));
-    await navigateTo('/dashboard')
+    await navigateTo('/')
   } catch (e: any) {
     errorShow.value = "Anmeldung fehlgeschlagen. Bitte versuche es erneut.";
   } finally {
