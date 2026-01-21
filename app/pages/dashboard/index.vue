@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const showInviteModal = ref(false)
+
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
 const session = useSupabaseSession()
@@ -7,6 +9,11 @@ const authStore = useAuthStore()
 const tenantStore = useTenantStore()
 const subStore = useSubscriptionStore()
 const autoStore = useAutomationsStore()
+
+const canManageMembers = computed(() => {
+  const role = tenantStore.currentTenant?.role
+  return role === 'admin' || role === 'owner'
+})
 
 const ready = ref(false)
 
@@ -27,7 +34,6 @@ const refreshAll = async () => {
 
 onMounted(async () => {
   await supabase.auth.getSession()
-  ready.value = true
 
   if (!user.value) {
     await navigateTo('/')
@@ -35,6 +41,7 @@ onMounted(async () => {
   }
 
   await refreshAll()
+  ready.value = true
 })
 </script>
 
@@ -69,14 +76,29 @@ onMounted(async () => {
           <div class="email">{{ user?.email }}</div>
         </div>
 
+        <button
+          v-if="canManageMembers"
+          class="btn"
+          :disabled="!tenantStore.currentTenantId"
+          @click="showInviteModal = true"
+        >
+            Mitglieder
+        </button>
+
         <button class="btn btn-danger" @click="logout">Abmelden</button>
+
+        <InviteMemberModal
+          v-model="showInviteModal"
+          :tenant-id="tenantStore.currentTenantId"
+          @created="() => {}"
+        />
       </div>
     </header>
 
     <!-- BODY -->
     <main class="main">
       <!-- Subscription Card -->
-      <section class="card">
+      <section class="card" v-if="canManageMembers">
         <div class="card-title">Abo</div>
 
         <div v-if="subStore.loading">Lade Abo…</div>

@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import Dashboard from "./pages/dashboard.vue"
+import Dashboard from "./pages/dashboard/index.vue"
 import { useAuthStore } from "./stores/auth";
 
 const authStore = useAuthStore()

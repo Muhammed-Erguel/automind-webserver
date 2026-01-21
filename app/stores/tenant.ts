@@ -42,8 +42,6 @@ export const useTenantStore = defineStore('tenant', () => {
 
       if (error) throw error
 
-      console.log()
-
       const mapped: TenantItem[] = (data ?? []).map((row: any) => ({
         tenant_id: row.tenant_id,
         role: row.role,
