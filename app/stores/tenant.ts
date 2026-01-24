@@ -73,6 +73,52 @@ export const useTenantStore = defineStore('tenant', () => {
     if (process.client) localStorage.removeItem('currentTenantId')
   }
 
+  async function getAccessToken() {
+  const { data, error } = await supabase.auth.getSession()
+  if (error) throw error
+  return data.session?.access_token ?? null
+}
+
+  async function callEdgeFunction(name: string, payload: any) {
+    const token = await getAccessToken()
+    if (!token) throw new Error('Nicht eingeloggt (keine Session).')
+
+    const res = await fetch(
+      `https://hdzwuhjjdmosfpdvaaou.supabase.co/functions/v1/${name}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      }
+    )
+
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      throw new Error(data?.error || data?.message || JSON.stringify(data))
+    }
+    return data
+  }
+
+  async function updateMemberRole(args: {
+    tenantId: string | null
+    userId: string
+    role: 'member' | 'admin'
+  }) {
+    const { tenantId, userId, role } = args
+    if (!tenantId || !userId) throw new Error('tenantId und userId sind erforderlich')
+    return await callEdgeFunction('member-update-role', { tenantId, userId, role })
+  }
+
+  async function removeMember(args: { tenantId: string; userId: string }) {
+    const { tenantId, userId } = args
+    if (!tenantId || !userId) throw new Error('tenantId und userId sind erforderlich')
+    return await callEdgeFunction('member-remove', { tenantId, userId })
+  }
+
+
   return {
     tenants,
     currentTenantId,
@@ -83,5 +129,7 @@ export const useTenantStore = defineStore('tenant', () => {
     loadTenants,
     setCurrentTenant,
     reset,
+    updateMemberRole,
+    removeMember
   }
 })
