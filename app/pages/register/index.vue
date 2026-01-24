@@ -27,7 +27,7 @@
         <form class="form" @submit.prevent="onSubmit">
 
           <div class="field">
-            <label for="company">E-Mail <span class="req">*</span></label>
+            <label for="company">Organisation <span class="req">*</span></label>
             <input
               id="company"
               v-model.trim="form.company"
