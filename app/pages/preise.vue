@@ -7,117 +7,146 @@
 
         <div class="plans">
           <button
+            v-for="p in stripeStore.plans"
+            :key="p.id"
             class="plan"
-            :class="{ selected: selected === 'starter' }"
+            :class="{
+              selected: selected === p.id,
+              active: stripeStore.currentPlanId === p.id && stripeStore.isActive,
+            }"
             type="button"
-            @click="selected = 'starter'"
+            @click="selected = p.id"
           >
             <div class="plan-top">
               <div>
-                <div class="plan-name">Starter</div>
-                <div class="plan-desc">Für den Einstieg</div>
+                <div class="plan-name">{{ p.name }}</div>
+                <div class="plan-desc">
+                  <!-- Optional: du kannst später plan description aus DB holen -->
+                  {{ planDesc(p.id) }}
+                </div>
               </div>
-              <div class="plan-price">€19<span>/Monat</span></div>
+
+              <div class="plan-price">
+                €{{ (p.price_cents / 100).toFixed(0) }}<span>/Monat</span>
+              </div>
             </div>
 
             <ul class="plan-list">
-              <li>✓ X Tokens / Monat</li>
-              <li>✓ KI-Listings & Texte</li>
-              <li>✓ Basis-Support</li>
-            </ul>
-          </button>
-
-          <button
-            class="plan"
-            :class="{ selected: selected === 'pro' }"
-            type="button"
-            @click="selected = 'pro'"
-          >
-
-            <div class="plan-top">
-              <div>
-                <div class="plan-name">Pro</div>
-                <div class="plan-desc">Für Power-User</div>
-              </div>
-              <div class="plan-price">€49<span>/Monat</span></div>
-            </div>
-
-            <ul class="plan-list">
-              <li>✓ Mehr Tokens / Monat</li>
-              <li>✓ Bulk-Lister</li>
-              <li>✓ Tracker & Monitoring</li>
-              <li>✓ Priorisierter Support</li>
-            </ul>
-          </button>
-
-          <button
-            class="plan"
-            :class="{ selected: selected === 'business' }"
-            type="button"
-            @click="selected = 'business'"
-          >
-            <div class="plan-top">
-              <div>
-                <div class="plan-name">Business</div>
-                <div class="plan-desc">Für Teams</div>
-              </div>
-              <div class="plan-price">€99<span>/Monat</span></div>
-            </div>
-
-            <ul class="plan-list">
-              <li>✓ Maximale Tokens</li>
-              <li>✓ Team-Funktionen</li>
-              <li>✓ Onboarding</li>
+              <!-- Optional: später aus DB/Config -->
+              <li v-for="(f, idx) in planFeatures(p.id)" :key="idx">✓ {{ f }}</li>
             </ul>
           </button>
         </div>
 
-        <button class="btn" :disabled="!selected || isSubmitting" @click="goToCheckout">
-          Jetzt abonnieren
+        <button
+          class="btn"
+          :disabled="!canCheckout"
+          @click="goToCheckout"
+        >
+          {{ checkoutButtonLabel }}
         </button>
 
-        <p v-if="error" class="error">{{ error }}</p>
+        <p v-if="stripeStore.error" class="error">{{ stripeStore.error }}</p>
+        <p v-else-if="error" class="error">{{ error }}</p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-const user = useSupabaseUser()
+import { ref, computed, onMounted } from "vue";
 
 useHead({ title: "Paket auswählen" });
 
-const selected = ref<"starter" | "pro" | "business" | "">("pro");
-const isSubmitting = ref(false);
+const user = useSupabaseUser();
+const tenantStore = useTenantStore();
+const stripeStore = useStripeStore();
+
+const supabase = useSupabaseClient()
+
+const selected = ref<string>(""); // wird nach Laden gesetzt
 const error = ref("");
 
-async function goToCheckout() {
+const currentTenantId = computed(() => tenantStore.currentTenantId);
+
+const canCheckout = computed(() => {
+  if (stripeStore.loading) return false;
+  if (!selected.value) return false;
+  if (!user.value) return true; // dann leiten wir zur Login Page um
+  // wenn schon aktiv auf gleichem Plan -> kein Checkout nötig
+  if (stripeStore.isActive && stripeStore.currentPlanId === selected.value) return false;
+  if (!currentTenantId.value) return false;
+  console.log("HERE")
+  return true;
+});
+
+const checkoutButtonLabel = computed(() => {
+  if (!user.value) return "Einloggen & abonnieren";
+  if (stripeStore.loading) return "Bitte warten...";
+  if (stripeStore.isActive && stripeStore.currentPlanId === selected.value) return "Aktives Paket";
+  return "Jetzt abonnieren";
+});
+
+onMounted(async () => {
+  await supabase.auth.getSession()
+
   if (!user.value) {
-    await navigateTo('/login')
+    await navigateTo("/login")
+    return
+  }
+
+  if (!tenantStore.isLoaded || !tenantStore.currentTenantId) {
+    await tenantStore.loadTenants()
+  }
+
+  await stripeStore.fetchPlans();
+
+  await stripeStore.fetchSubscriptionForTenant(currentTenantId.value);
+
+  if (!selected.value) {
+    selected.value = stripeStore.currentPlanId || stripeStore.plans[0]?.id || "";
+  }
+});
+
+async function goToCheckout() {
+  error.value = "";
+
+  if (!user.value) {
+    await navigateTo("/login");
     return;
   }
-  
-  error.value = "";
+
   if (!selected.value) return;
 
-  isSubmitting.value = true;
   try {
-    // TODO: z.B. Stripe Checkout Session erstellen
-    // const { url } = await $fetch('/api/checkout', { method: 'POST', body: { plan: selected.value }})
-    // await navigateTo(url, { external: true })
-
-    await new Promise((r) => setTimeout(r, 300));
-    alert(`Demo: Checkout für Paket "${selected.value}"`);
+    // Start hosted Stripe checkout via Edge Function
+    await stripeStore.startCheckout(selected.value);
   } catch (e: any) {
-    error.value = "Checkout konnte nicht gestartet werden.";
-  } finally {
-    isSubmitting.value = false;
+    error.value = e?.message ?? "Checkout konnte nicht gestartet werden.";
   }
+}
+
+/**
+ * OPTIONAL: Features/Descriptions lokal mappen (bis du es in DB speicherst)
+ * Du kannst das später 1:1 durch DB Felder ersetzen.
+ */
+function planDesc(planId: string) {
+  if (planId === "starter") return "Für den Einstieg";
+  if (planId === "pro") return "Für Power-User";
+  if (planId === "business") return "Für Teams";
+  return "Paket";
+}
+
+function planFeatures(planId: string) {
+  if (planId === "starter") return ["X Tokens / Monat", "KI-Listings & Texte", "Basis-Support"];
+  if (planId === "pro") return ["Mehr Tokens / Monat", "Bulk-Lister", "Tracker & Monitoring", "Priorisierter Support"];
+  if (planId === "business") return ["Maximale Tokens", "Team-Funktionen", "Onboarding"];
+  return ["Features"];
 }
 </script>
 
 <style scoped>
+/* dein CSS bleibt exakt wie es ist */
 .page {
   min-height: calc(100vh - 72px);
   display: flex;
