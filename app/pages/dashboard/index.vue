@@ -135,9 +135,11 @@ onMounted(async () => {
             <div class="label">Plan</div>
             <div class="big">{{ subStore.subscription.plan_name ?? subStore.subscription.plan_id }}</div>
           </div>
-          <div v-if="subStore.subscription.current_period_end">
-            <div class="label">Läuft bis</div>
-            <div class="big">{{ subStore.subscription.current_period_end }}</div>
+          <div v-if="subStore.endsAt && subStore.isActive">
+            <div class="label">
+              {{ subStore.isCanceling ? "Gekündigt – läuft noch bis" : "Läuft bis" }}
+            </div>
+            <div class="big">{{ new Date(subStore.endsAt).toLocaleDateString() }}</div>
           </div>
         </div>
 

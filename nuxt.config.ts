@@ -28,6 +28,8 @@ export default defineNuxtConfig({
     },
   },
   runtimeConfig: {
-    url: process.env.SUPABASE_URL || "empty"
+    public: {
+      supabaseUrl: process.env.SUPABASE_URL || "empty"
+    }
   }
 })

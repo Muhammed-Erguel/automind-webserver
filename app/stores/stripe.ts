@@ -49,13 +49,13 @@ export const useStripeStore = defineStore("stripe", () => {
 
   async function callEdgeFunction(name: string, payload: any) {
     const config = useRuntimeConfig();
-    console.log(config.url);
+    console.log(config.public.supabaseUrl);
 
     const token = await getAccessToken();
     if (!token) throw new Error("Nicht eingeloggt (keine Session).");
 
     const res = await fetch(
-      `${config.url}/functions/v1/${name}`,
+      `${config.public.supabaseUrl}/functions/v1/${name}`,
       {
         method: "POST",
         headers: {
