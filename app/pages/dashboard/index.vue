@@ -135,7 +135,7 @@ onMounted(async () => {
             <div class="label">Plan</div>
             <div class="big">{{ subStore.subscription.plan_name ?? subStore.subscription.plan_id }}</div>
           </div>
-          <div v-if="subStore.endsAt && subStore.isActive">
+          <div v-if="subStore.endsAt">
             <div class="label">
               {{ subStore.isCanceling ? "Gekündigt – läuft noch bis" : "Läuft bis" }}
             </div>
