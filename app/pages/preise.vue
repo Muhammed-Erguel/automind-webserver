@@ -76,7 +76,6 @@ const canCheckout = computed(() => {
   // wenn schon aktiv auf gleichem Plan -> kein Checkout nötig
   if (stripeStore.isActive && stripeStore.currentPlanId === selected.value) return false;
   if (!currentTenantId.value) return false;
-  console.log("HERE")
   return true;
 });
 

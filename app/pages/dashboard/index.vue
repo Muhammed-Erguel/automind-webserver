@@ -17,6 +17,11 @@ const canManageMembers = computed(() => {
 
 const ready = ref(false)
 
+async function upgradeAbo() {
+  const stripeStore = useStripeStore();
+  await stripeStore.startCheckout("starter")
+}
+
 const logout = async () => {
   await supabase.auth.signOut()
   authStore.logged = false
@@ -135,7 +140,7 @@ onMounted(async () => {
           <div class="muted">
             Dein Abo ist nicht aktiv. Bitte upgraden, um Automationen und Chatbot zu nutzen.
           </div>
-          <button class="btn">Upgrade</button>
+          <button class="btn" @click="upgradeAbo">Upgrade</button>
         </div>
       </section>
 
