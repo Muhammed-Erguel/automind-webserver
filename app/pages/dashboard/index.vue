@@ -10,6 +10,9 @@ const tenantStore = useTenantStore()
 const subStore = useSubscriptionStore()
 const autoStore = useAutomationsStore()
 
+
+const stripeStore = useStripeStore();
+
 const canManageMembers = computed(() => {
   const role = tenantStore.currentTenant?.role
   return role === 'admin' || role === 'owner'
@@ -18,8 +21,11 @@ const canManageMembers = computed(() => {
 const ready = ref(false)
 
 async function upgradeAbo() {
-  const stripeStore = useStripeStore();
-  await stripeStore.startCheckout("starter")
+  await stripeStore.startCheckout(subStore.subscription?.plan_id)
+}
+
+async function cancelAbo() {
+  await stripeStore.startCancel(subStore.subscription?.plan_id)
 }
 
 const logout = async () => {
@@ -141,6 +147,10 @@ onMounted(async () => {
             Dein Abo ist nicht aktiv. Bitte upgraden, um Automationen und Chatbot zu nutzen.
           </div>
           <button class="btn" @click="upgradeAbo">Upgrade</button>
+        </div>
+
+        <div v-else>
+          <button class="btn" @click="cancelAbo" style="margin-top: 1%;">kündigen</button>
         </div>
       </section>
 

@@ -48,11 +48,14 @@ export const useStripeStore = defineStore("stripe", () => {
   }
 
   async function callEdgeFunction(name: string, payload: any) {
+    const config = useRuntimeConfig();
+    console.log(config.url);
+
     const token = await getAccessToken();
     if (!token) throw new Error("Nicht eingeloggt (keine Session).");
 
     const res = await fetch(
-      `https://hdzwuhjjdmosfpdvaaou.supabase.co/functions/v1/${name}`,
+      `${config.url}/functions/v1/${name}`,
       {
         method: "POST",
         headers: {
@@ -121,7 +124,8 @@ export const useStripeStore = defineStore("stripe", () => {
    * Erwartet Edge Function: create-checkout-session
    * Rückgabe: { url: string }
    */
-  async function startCheckout(planId: string) {
+  async function startCheckout(planId: string | undefined) {
+    if (planId === undefined) throw new Error("Kein planId ausgewählt"); 
     const tid = currentTenantId.value;
     if (!tid) throw new Error("Kein Tenant ausgewählt.");
 
@@ -135,6 +139,32 @@ export const useStripeStore = defineStore("stripe", () => {
       });
 
       if (!data?.url) throw new Error("create-checkout-session hat keine url zurückgegeben.");
+
+      // Redirect zu Stripe Checkout
+      window.location.href = data.url;
+    } catch (e: any) {
+      error.value = e?.message ?? String(e);
+      throw e;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function startCancel(planId: string | undefined) {
+    if (planId === undefined) throw new Error("Kein planId ausgewählt"); 
+    const tid = currentTenantId.value;
+    if (!tid) throw new Error("Kein Tenant ausgewählt.");
+
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const data = await callEdgeFunction("cancel-subscription", {
+        tenant_id: tid,
+        plan_id: planId,
+      });
+
+      if (!data?.url) throw new Error("cancel-subscription hat keine url zurückgegeben.");
 
       // Redirect zu Stripe Checkout
       window.location.href = data.url;
@@ -198,5 +228,6 @@ export const useStripeStore = defineStore("stripe", () => {
     startCheckout,
     refreshAfterCheckout,
     reset,
+    startCancel
   };
 });

@@ -81,10 +81,13 @@ export const useTenantStore = defineStore('tenant', () => {
 
   async function callEdgeFunction(name: string, payload: any) {
     const token = await getAccessToken()
+    const config = useRuntimeConfig();
+    console.log(config.url);
+
     if (!token) throw new Error('Nicht eingeloggt (keine Session).')
 
     const res = await fetch(
-      `https://hdzwuhjjdmosfpdvaaou.supabase.co/functions/v1/${name}`,
+      `${config.url}/functions/v1/${name}`,
       {
         method: 'POST',
         headers: {

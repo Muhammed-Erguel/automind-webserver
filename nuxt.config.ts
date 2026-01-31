@@ -27,4 +27,7 @@ export default defineNuxtConfig({
       saveRedirectToCookie: false,
     },
   },
+  runtimeConfig: {
+    url: process.env.SUPABASE_URL || "empty"
+  }
 })
